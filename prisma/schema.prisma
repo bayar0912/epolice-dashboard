@@ -1,0 +1,143 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String
+  badge     String?
+  status    String   // 'active' | 'break' | 'off-duty'
+  location  String?
+  cases     Int?
+  messages  Message[]
+  menus     Menu[]   // User specific menus
+}
+
+model EmergencyCall {
+  id        Int      @id @default(autoincrement())
+  type      String
+  location  String
+  priority  String   // 'high' | 'medium' | 'low'
+  time      String
+  officer   String
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  text      String
+  createdAt DateTime @default(now())
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String
+}
+
+model Menu {
+  id     Int     @id @default(autoincrement())
+  name   String
+  path   String  @unique
+  roles  String  // comma separated roles: 'user,admin,superadmin'
+  userId Int?    // specific user ID, null means all users with matching roles
+  user   User?   @relation(fields: [userId], references: [id])
+}
+
+model CallType {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+}
+
+model CallCategory {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+}
+
+model PoliceOfficer {
+  id          Int      @id @default(autoincrement())
+  badge       String   @unique
+  firstName   String
+  lastName    String
+  rank        String
+  department  String
+  position    String
+  phone       String
+  email       String?
+  address     String?
+  birthDate   String?
+  hireDate    String
+  status      String   @default("active") // active, suspended, retired
+  photo       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Томилгоот багт орох холбоо
+  taskForceMembers TaskForceMember[]
+}
+
+model TaskForce {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  objective   String   // Зорилго
+  startDate   String
+  endDate     String?
+  status      String   @default("active") // active, completed, cancelled
+  priority    String   @default("medium") // high, medium, low
+  location    String?
+  commander   String   // Багийн ахлагч
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Багийн гишүүд
+  members     TaskForceMember[]
+  // Багийн үйл ажиллагаа
+  activities  TaskForceActivity[]
+}
+
+model TaskForceMember {
+  id            Int      @id @default(autoincrement())
+  taskForceId   Int
+  officerId     Int
+  role          String   // Багт гүйцэтгэх үүрэг
+  joinDate      String
+  leaveDate     String?
+  status        String   @default("active") // active, inactive
+  createdAt     DateTime @default(now())
+  
+  taskForce     TaskForce     @relation(fields: [taskForceId], references: [id], onDelete: Cascade)
+  officer       PoliceOfficer @relation(fields: [officerId], references: [id], onDelete: Cascade)
+  
+  @@unique([taskForceId, officerId])
+}
+
+model TaskForceActivity {
+  id            Int      @id @default(autoincrement())
+  taskForceId   Int
+  title         String
+  description   String?
+  activityDate  String
+  location      String?
+  status        String   @default("planned") // planned, in-progress, completed, cancelled
+  result        String?  // Үр дүн
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  taskForce     TaskForce @relation(fields: [taskForceId], references: [id], onDelete: Cascade)
+}
