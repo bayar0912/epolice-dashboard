@@ -4,6 +4,9 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: [],
   },
+  // cPanel/Plesk зэрэг Node сервер дээр байршуулж ажиллуулахын тулд standalone build үүсгэнэ
+  // Энэ нь `.next/standalone` хавтасыг үүсгэж, `node .next/standalone/server.js`-аар ажиллуулна
+  output: 'standalone',
   // Бүх IP хаягуудаас хандах боломжтой болгох
   async rewrites() {
     return []
