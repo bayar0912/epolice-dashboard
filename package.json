@@ -11,7 +11,9 @@
     "start:network": "next start -H 0.0.0.0",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "start:standalone": "node server.js"
+    "start:standalone": "node server.js",
+    "prisma:gen:sqlite": "prisma generate --schema=prisma/schema.sqlite.prisma",
+    "prisma:push:sqlite": "prisma db push --schema=prisma/schema.sqlite.prisma"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.10",
