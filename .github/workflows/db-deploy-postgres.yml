@@ -1,0 +1,38 @@
+name: DB Deploy (Postgres via Neon)
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_seed:
+        description: 'Run seed after schema push (true/false)'
+        required: false
+        default: 'true'
+
+jobs:
+  deploy-db:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Generate Prisma Client (Postgres)
+        run: npm run prisma:gen:pg
+
+      - name: Push schema (Postgres)
+        run: npm run prisma:push:pg
+
+      - name: Seed database (optional)
+        if: ${{ inputs.run_seed == 'true' }}
+        run: npm run prisma:seed:pg
