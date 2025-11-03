@@ -1,0 +1,135 @@
+// Prisma schema for PostgreSQL production (e.g., Neon/Supabase)
+// Mirrors the MySQL models; most types are cross-compatible.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String
+  badge     String?
+  status    String
+  location  String?
+  cases     Int?
+  messages  Message[]
+  menus     Menu[]
+}
+
+model EmergencyCall {
+  id        Int      @id @default(autoincrement())
+  type      String
+  location  String
+  priority  String
+  time      String
+  officer   String
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  text      String
+  createdAt DateTime @default(now())
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String
+}
+
+model Menu {
+  id     Int     @id @default(autoincrement())
+  name   String
+  path   String  @unique
+  roles  String
+  userId Int?
+  user   User?   @relation(fields: [userId], references: [id])
+}
+
+model CallType {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+}
+
+model CallCategory {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+}
+
+model PoliceOfficer {
+  id          Int      @id @default(autoincrement())
+  badge       String   @unique
+  firstName   String
+  lastName    String
+  rank        String
+  department  String
+  position    String
+  phone       String
+  email       String?
+  address     String?
+  birthDate   String?
+  hireDate    String
+  status      String   @default("active")
+  photo       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  taskForceMembers TaskForceMember[]
+}
+
+model TaskForce {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  objective   String
+  startDate   String
+  endDate     String?
+  status      String   @default("active")
+  priority    String   @default("medium")
+  location    String?
+  commander   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  members     TaskForceMember[]
+  activities  TaskForceActivity[]
+}
+
+model TaskForceMember {
+  id            Int      @id @default(autoincrement())
+  taskForceId   Int
+  officerId     Int
+  role          String
+  joinDate      String
+  leaveDate     String?
+  status        String   @default("active")
+  createdAt     DateTime @default(now())
+
+  taskForce     TaskForce     @relation(fields: [taskForceId], references: [id], onDelete: Cascade)
+  officer       PoliceOfficer @relation(fields: [officerId], references: [id], onDelete: Cascade)
+
+  @@unique([taskForceId, officerId])
+}
+
+model TaskForceActivity {
+  id            Int      @id @default(autoincrement())
+  taskForceId   Int
+  title         String
+  description   String?
+  activityDate  String
+  location      String?
+  status        String   @default("planned")
+  result        String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  taskForce     TaskForce @relation(fields: [taskForceId], references: [id], onDelete: Cascade)
+}

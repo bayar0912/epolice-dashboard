@@ -14,6 +14,9 @@
     "start:standalone": "node server.js",
     "prisma:gen:sqlite": "prisma generate --schema=prisma/schema.sqlite.prisma",
     "prisma:push:sqlite": "prisma db push --schema=prisma/schema.sqlite.prisma",
+  "prisma:gen:pg": "prisma generate --schema=prisma/schema.postgres.prisma",
+  "prisma:push:pg": "prisma db push --schema=prisma/schema.postgres.prisma",
+  "prisma:seed:pg": "prisma db seed --schema=prisma/schema.postgres.prisma",
     "prisma:seed": "prisma db seed",
     "prisma:seed:sqlite": "prisma db seed --schema=prisma/schema.sqlite.prisma"
   },
