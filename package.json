@@ -13,7 +13,12 @@
     "postinstall": "prisma generate",
     "start:standalone": "node server.js",
     "prisma:gen:sqlite": "prisma generate --schema=prisma/schema.sqlite.prisma",
-    "prisma:push:sqlite": "prisma db push --schema=prisma/schema.sqlite.prisma"
+    "prisma:push:sqlite": "prisma db push --schema=prisma/schema.sqlite.prisma",
+    "prisma:seed": "prisma db seed",
+    "prisma:seed:sqlite": "prisma db seed --schema=prisma/schema.sqlite.prisma"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.10",

@@ -1,0 +1,50 @@
+name: CI (SQLite)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare .env for SQLite
+        run: cp .env.sqlite.example .env
+
+      - name: Generate Prisma Client (SQLite)
+        run: npm run prisma:gen:sqlite
+
+      - name: Create DB schema (SQLite)
+        run: npm run prisma:push:sqlite
+
+      - name: Seed database (SQLite)
+        run: npm run prisma:seed:sqlite
+
+      - name: Build Next.js (standalone)
+        run: npm run build
+
+      - name: Upload build artifacts (optional)
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-standalone
+          path: |
+            .next/standalone
+            .next/static
+            public
+          retention-days: 7
